@@ -1,0 +1,10 @@
+click
+Flask
+imutils
+jpype1
+matplotlib
+numpy
+opencv-contrib-python==4.5.5.64
+pykalman
+pyyaml
+scipy
