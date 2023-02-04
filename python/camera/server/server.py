@@ -63,7 +63,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
         r = ansible_runner.run(playbook = 'install_software.yml', forks = 10, status_handler = my_status_handler)
         r = ansible_runner.run(playbook = 'sync_time.yml', forks = 10, status_handler = my_status_handler)
         r = ansible_runner.run(playbook = 'reboot.yml', forks = 10, cmdline = '-- tags reboot', status_handler = my_status_handler)
-        r = ansible_runner.run(playbook = 'synch_code.yml', forks = 10, status_handler = my_status_handler)
+        r = ansible_runner.run(playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
         return "Running anible set up scripts"
 
     @app.route("/run_ansible_to_copy_latest_python_files")
