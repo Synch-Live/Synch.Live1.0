@@ -5,6 +5,7 @@ from imutils.video import VideoStream
 import signal
 import logging
 import yaml
+import ansible_runner
 from types import SimpleNamespace
 from copy import deepcopy
 
@@ -55,6 +56,28 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     @app.route("/sync")
     def return_sync():
         return jsonify(proc.Sync)
+
+    @app.route("/run_ansible_set_up_scripts")
+    def run_ansible_script():
+        r = ansible_runner.run(playbook = 'config_hardware.yml', forks=10, status_handler = my_status_handler)
+        r = ansible_runner.run(playbook = 'install_software.yml', forks = 10, status_handler = my_status_handler)
+        r = ansible_runner.run(playbook = 'sync_time.yml', forks = 10, status_handler = my_status_handler)
+        r = ansible_runner.run(playbook = 'reboot.yml', forks = 10, cmdline = '-- tags reboot', status_handler = my_status_handler)
+        r = ansible_runner.run(playbook = 'synch_code.yml', forks = 10, status_handler = my_status_handler)
+        return "Running anible set up scripts"
+
+    @app.route("/run_ansible_to_copy_latest_python_files")
+    def run_ansible_to_copy_latest_python_files():
+        r = ansible_runner.run(playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
+        return "Running anible script that copies the latest python files"
+
+    @app.route("/run_ansible_script_to_synchronise_clocks")
+    def run_ansible_script_to_synchronise_clocks():
+        r = ansible_runner.run(playbook = 'sync_time.yml', forks = 10, cmdline = '--tags experiment', status_handler = my_status_handler)
+        return "Running anible script to synchronise clocks for experiment"
+
+    def my_status_handler(data):
+        print(data)
 
     @app.route("/start_tracking")
     def start_tracking():
