@@ -76,7 +76,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
         r = ansible_runner.run(playbook = 'sync_time.yml', forks = 10, cmdline = '--tags experiment', status_handler = my_status_handler)
         return "Running anible script to synchronise clocks for experiment"
 
-    def my_status_handler(data):
+    def my_status_handler(data, runner_config):
         print(data)
 
     @app.route("/start_tracking")
