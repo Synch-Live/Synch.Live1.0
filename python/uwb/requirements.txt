@@ -1,0 +1,9 @@
+click
+Flask
+imutils
+jpype1
+matplotlib
+numpy
+pykalman
+pyyaml
+scipy

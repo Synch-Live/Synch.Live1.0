@@ -1,0 +1,10 @@
+server:
+  RECORD: false
+  RECORD_PATH: ../media/video
+  IMG_PATH: ../media/img
+  HOST: 0.0.0.0
+  PORT: 8888
+game:
+  task: "emergence"
+tracking:
+  max_players: 10
