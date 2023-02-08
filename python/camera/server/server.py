@@ -59,8 +59,8 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
     @app.route("/test_lights")
     def test_lights():
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='test_lights.yml', forks=10, limit='players',
-                           status_handler=status_handler)
+        ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='test_lights.yml', forks=10,
+                                 tags='rainbow', status_handler=status_handler)
         return "Lights tested!"
 
     @app.route("/run_setup_scripts")
