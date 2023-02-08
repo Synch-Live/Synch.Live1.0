@@ -74,6 +74,28 @@
       shell: "raspi-config nonint do_rgpio 0"
       when: (RGPIO == True) and (rgpio_status.stdout != '0')
 
+- name: Config files for observer
+  tags: setup
+  hosts: observer
+  become: true
+
+  tasks:
+    - name: Copy systemd flask service
+      copy:
+        src: lib/systemd/system/flask.service
+        dest: /lib/systemd/system/flask.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Install systemd flask service
+      shell: "systemctl enable flask"
+    - name: Copy avahi flask service
+      copy:
+        src: etc/avahi/services/flask.service
+        dest: /etc/avahi/services/flask.service
+        owner: root
+        group: root
+        mode: 0644
 
 - name: Config files for players
   tags: setup
