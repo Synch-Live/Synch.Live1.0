@@ -27,8 +27,6 @@ awb_modes = [
     "greyworld"
 ]
 
-ansible_dir_path = "../ansible"
-
 def create_app(server_type, conf, conf_path, camera_stream=None):
     app = Flask(__name__)
     app.debug = True
@@ -67,16 +65,19 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
         r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'reboot.yml', forks = 10, cmdline = '-- tags reboot', status_handler = my_status_handler)
         r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
         return "Running anible set up scripts"
+        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
 
     @app.route("/run_ansible_to_copy_latest_python_files")
     def run_ansible_to_copy_latest_python_files():
         r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
         return "Running anible script that copies the latest python files"
+        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
 
     @app.route("/run_ansible_script_to_synchronise_clocks")
     def run_ansible_script_to_synchronise_clocks():
         r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_time.yml', forks = 10, cmdline = '--tags experiment', status_handler = my_status_handler)
         return "Running anible script to synchronise clocks for experiment"
+        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
 
     def my_status_handler(data, runner_config):
         print(data)
