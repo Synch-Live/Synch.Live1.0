@@ -18,20 +18,17 @@
   tags: setup
   hosts: observer
   tasks:
-  - name: Create directory
-    file:
-      path: /home/pi/ansible
-      state: directory
   - name: Copy config
     copy:
       src: "{{ item }}"
-      dest: /home/pi/ansible
+      dest: /home/pi/ansible/
       owner: pi
       group: pi
       mode: 0644
     with_items:
       - ansible.cfg
       - hosts
+      - files
   - name: Copy plays
     copy:
       src: "{{ item }}"
