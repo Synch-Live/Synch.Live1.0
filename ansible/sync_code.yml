@@ -28,7 +28,6 @@
     with_items:
       - ansible.cfg
       - hosts
-      - files
   - name: Copy plays
     copy:
       src: "{{ item }}"
