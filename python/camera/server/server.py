@@ -102,7 +102,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             proc.stop()
         return redirect(url_for("index"))
 
-    @app.route("/calibrate", methods = [ 'GET', 'POST' ])
+    @app.route("/calibrate", methods=['GET', 'POST'])
     def calibrate():
         use_picamera = proc.config.server.CAMERA == 'pi'
 
@@ -112,8 +112,8 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             opts['detection']['min_colour'] = hsv_to_hex(vars(proc.config.detection.min_colour))
             opts['detection']['max_colour'] = hsv_to_hex(vars(proc.config.detection.max_colour))
 
-            return render_template("calibrate.html", use_picamera = use_picamera,
-                conf_path = proc.config.conf_path, save_file = False, opts = opts, awb_modes = awb_modes)
+            return render_template("calibrate.html", use_picamera=use_picamera,
+                                   conf_path=proc.config.conf_path, save_file=False, opts=opts, awb_modes=awb_modes)
         else:
             proc.update_tracking_conf(request.form['max_players'])
             proc.update_detection_conf(
@@ -122,7 +122,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
             if use_picamera:
                 proc.update_picamera(request.form['iso'], request.form['shutter_speed'],
-                    request.form['saturation'], request.form['awb_mode'])
+                                     request.form['saturation'], request.form['awb_mode'])
 
             if 'save_file' in request.form:
                 conf_path = request.form['conf_path']
@@ -135,7 +135,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
             return redirect(url_for("calibrate"))
 
-    @app.route("/observe", methods = ['GET', 'POST'])
+    @app.route("/observe", methods=['GET', 'POST'])
     def observe():
         if request.method == "POST":
             psi = int(request.form.get("manPsi"))
@@ -158,19 +158,19 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             HTTP response of corresponding type containing the generated stream
         """
         return Response(proc.generate_frame(),
-            mimetype = "multipart/x-mixed-replace; boundary=frame")
+                        mimetype="multipart/x-mixed-replace; boundary=frame")
 
     return app
 
 
 if __name__ == '__main__':
-    server_type='observer'
+    server_type = 'observer'
     if len(sys.argv) > 1:
         server_type = sys.argv[1]
 
-    host = os.environ.get('HOST', default = '0.0.0.0')
-    port = int(os.environ.get('PORT', default = '8888'))
-    conf_path = os.environ.get('CONFIG_PATH', default = './camera/config/default.yml')
+    host = os.environ.get('HOST', default='0.0.0.0')
+    port = int(os.environ.get('PORT', default='8888'))
+    conf_path = os.environ.get('CONFIG_PATH', default='./camera/config/default.yml')
     print(os.path.abspath("."))
 
     logging.info(f"Starting server, listening on {host} at port {port}, using config at {conf_path}")
@@ -185,8 +185,8 @@ if __name__ == '__main__':
         camera_stream = None
         if camera_number != None and type(camera_number) == int:
             logging.info(f"Opening Camera {camera_number}")
-            camera_stream = VideoStream(int(camera_number), framerate = config.camera.framerate)
+            camera_stream = VideoStream(int(camera_number), framerate=config.camera.framerate)
 
         create_app(server_type, config, conf_path, camera_stream=camera_stream).run(
-                host = host, port = port, debug = True,
-                threaded = True, use_reloader = False)
+            host=host, port=port, debug=True,
+            threaded=True, use_reloader=False)
