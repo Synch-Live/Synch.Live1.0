@@ -9,10 +9,11 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [observer]
-192.168.100.100
+observer.local
 
 [players]
-192.168.100.[101:112]
+# player[1:12].local
+player[4:5].local
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
