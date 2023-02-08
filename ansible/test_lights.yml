@@ -19,6 +19,7 @@
   hosts: players
   tasks:
   - name: Turn on pilot
+    become: true
     shell:
       cmd: python3 wait.py pilot
       chdir: /home/pi/leds
@@ -28,6 +29,7 @@
   hosts: players
   tasks:
   - name: Run breathing
+    become: true
     shell:
       cmd: python3 wait.py breathe
       chdir: /home/pi/leds
@@ -37,6 +39,7 @@
   hosts: players
   tasks:
   - name: Run rainbow
+    become: true
     shell:
       cmd: python3 wait.py rainbow
       chdir: /home/pi/leds
@@ -46,6 +49,7 @@
   hosts: players
   tasks:
   - name: Run exposure
+    become: true
     shell:
       cmd: python3 wait.py exposure
       chdir: /home/pi/leds
@@ -68,9 +72,11 @@
   tasks:
 
   - name: Turn off leds
+    become: true
     shell: "python3 /home/pi/leds/stop.py"
 
   - name: Turn on pilot
+    become: true
     shell: "python3 /home/pi/leds/wait.py pilot"
 
   - name: Delete cron job
