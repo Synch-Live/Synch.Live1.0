@@ -75,20 +75,20 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
                            tags='reboot', status_handler=my_status_handler)
         ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
                            status_handler=my_status_handler)
-        return "Running ansible set up scripts"
+        return "Setup scripts run!"
 
     @app.route("/run_ansible_to_copy_latest_python_files")
     def run_ansible_to_copy_latest_python_files():
         ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
                            status_handler=my_status_handler)
-        return "Running ansible script that copies the latest python files"
+        return "Code sync script run!"
 
     @app.route("/run_ansible_script_to_synchronise_clocks")
     def run_ansible_script_to_synchronise_clocks():
         ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', limit='players', forks=10,
                            tags='experiment',
                            status_handler=my_status_handler)
-        return "Running ansible script to synchronise clocks for experiment"
+        return "Clock synchronisation script run!"
 
     def my_status_handler(data, runner_config):
         print(data)
