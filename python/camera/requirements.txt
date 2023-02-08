@@ -3,10 +3,10 @@ Flask~=2.2.2
 imutils~=0.5.4
 jpype1
 matplotlib~=3.6.3
-numpy~=1.24.1
+numpy~=1.20.3
 opencv-contrib-python~=4.4.0.46
 pykalman~=0.9.5
 pyyaml~=6.0
-scipy~=1.10.0
+scipy~=1.7.3
 ansible
 ansible-runner
