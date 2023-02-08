@@ -1,0 +1,11 @@
+[Unit]
+Description=Flask web server for observer.
+
+[Service]
+User=pi
+WorkingDirectory=~
+Type=simple
+ExecStart=python3 camera/server/server.py observer
+
+[Install]
+WantedBy=multi-user.target
