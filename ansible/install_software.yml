@@ -52,7 +52,7 @@
         - libatlas-base-dev
         - libavcodec-dev
         - libavformat-dev
-        - libgtk-3.0
+        - libgtk-3-0
         - libhdf5-dev
         - libilmbase-dev
         - libopenexr-dev
