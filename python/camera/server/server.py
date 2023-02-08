@@ -57,6 +57,12 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     def return_sync():
         return jsonify(proc.Sync)
 
+    @app.route("/test_lights")
+    def test_lights():
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='test_lights.yml', forks=10, limit='players',
+                           status_handler=my_status_handler)
+        return "Lights tested!"
+
     @app.route("/run_ansible_set_up_scripts")
     def run_ansible_script():
         ansible_runner.run(private_data_dir=ansible_dir_path, playbook='config_hardware.yml', forks=10, limit='players',
