@@ -59,7 +59,6 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
     @app.route("/run_ansible_set_up_scripts")
     def run_ansible_script():
-        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
         ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='config_hardware.yml', forks=10,
                                  status_handler=my_status_handler)
         ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='install_software.yml', forks=10,
@@ -74,14 +73,12 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
     @app.route("/run_ansible_to_copy_latest_python_files")
     def run_ansible_to_copy_latest_python_files():
-        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
         ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='sync_code.yml', forks=10,
                                  status_handler=my_status_handler)
         return "Running ansible script that copies the latest python files"
 
     @app.route("/run_ansible_script_to_synchronise_clocks")
     def run_ansible_script_to_synchronise_clocks():
-        ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
         ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='sync_time.yml', forks=10,
                                  tags='experiment',
                                  status_handler=my_status_handler)
@@ -171,6 +168,7 @@ if __name__ == '__main__':
     host = os.environ.get('HOST', default='0.0.0.0')
     port = int(os.environ.get('PORT', default='8888'))
     conf_path = os.environ.get('CONFIG_PATH', default='./camera/config/default.yml')
+    ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
     print(os.path.abspath("."))
 
     logging.info(f"Starting server, listening on {host} at port {port}, using config at {conf_path}")
