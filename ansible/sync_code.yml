@@ -28,6 +28,17 @@
     with_items:
       - ansible.cfg
       - hosts
+  - name: Copy files
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/ansible/files
+      owner: pi
+      group: pi
+      mode: 0644
+    with_items:
+      - boot
+      - etc
+      - lib
   - name: Copy plays
     copy:
       src: "{{ item }}"
