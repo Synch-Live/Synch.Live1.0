@@ -59,27 +59,27 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
     @app.route("/run_ansible_set_up_scripts")
     def run_ansible_script():
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='config_hardware.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='config_hardware.yml', forks=10, limit='players',
                            status_handler=my_status_handler)
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='install_software.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='install_software.yml', forks=10, limit='players',
                            status_handler=my_status_handler)
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', forks=10, limit='players',
                            status_handler=my_status_handler)
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='reboot.yml', forks=10, tags='reboot',
-                           status_handler=my_status_handler)
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='reboot.yml', forks=10, limit='players',
+                           tags='reboot', status_handler=my_status_handler)
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
                            status_handler=my_status_handler)
         return "Running ansible set up scripts"
 
     @app.route("/run_ansible_to_copy_latest_python_files")
     def run_ansible_to_copy_latest_python_files():
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
                            status_handler=my_status_handler)
         return "Running ansible script that copies the latest python files"
 
     @app.route("/run_ansible_script_to_synchronise_clocks")
     def run_ansible_script_to_synchronise_clocks():
-        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', forks=10,
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', limit='players', forks=10,
                            tags='experiment',
                            status_handler=my_status_handler)
         return "Running ansible script to synchronise clocks for experiment"
