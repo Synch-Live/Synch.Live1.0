@@ -75,6 +75,8 @@
         - picamera
         - pykalman
         - pyyaml
+        - ansible
+        - ansible-runner
       executable: pip3
       state: latest
 
