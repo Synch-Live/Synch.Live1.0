@@ -24,7 +24,7 @@
       shell:
         cmd: python3 stop.py
         chdir: /home/pi/leds
-    - name: reboot (wait up to 120sec)
+    - name: reboot (wait up to 240sec)
       reboot:
-        reboot_timeout: 120
+        reboot_timeout: 240
 
