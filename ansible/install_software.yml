@@ -80,6 +80,14 @@
       executable: pip3
       state: latest
 
+  - name: Install camera package
+    pip:
+      name:
+        - /home/pi
+      editable: true
+      executable: pip3
+      state: latest
+
 
 - name: Install necessary software on players
   tags: setup
