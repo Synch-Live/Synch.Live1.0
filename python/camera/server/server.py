@@ -90,7 +90,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
                            status_handler=status_handler)
         return "Clock synchronisation script run!"
 
-    def status_handler(data, _runner_config):
+    def status_handler(data, runner_config):
         print(data)
 
     @app.route("/start_tracking")
