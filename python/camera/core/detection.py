@@ -11,6 +11,9 @@ from typing import Any, List, Tuple, Optional, Union
 # initialise logging to file
 import camera.core.logger
 
+# importing writing in database functions
+from camera.server.database import *
+
 class Detector():
     def __init__(self, config: SimpleNamespace) -> None:
         """
@@ -52,6 +55,9 @@ class Detector():
 
         if len(boxes):
             logging.info(f"Found {len(boxes)} blobs in frame.")
+
+        # writing coordinates in database.db in table 'trajectories'
+        write_in_trajectories_player_coordinates(boxes)
 
 
     def draw_bbox(self,
@@ -135,7 +141,7 @@ class Detector():
 
             frame = self.draw_bbox(frame, i + 1, box)
 
-        return frame
+        return frame 
 
 
     def detect_colour(self,

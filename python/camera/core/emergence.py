@@ -9,17 +9,19 @@ e1008289.
 
 Pedro Mediano, Oct 2021
 """
-
 import click
 import jpype as jp
 import logging
 import numpy as np
 import os
-
+# blobs in frame
 from typing import Callable, Iterable
 
 # initialise logging to file
 import camera.core.logger
+
+# importing writing in database functions
+from camera.server.database import *  
 
 INFODYNAMICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'infodynamics.jar')
 SAMPLE_THRESHOLD = 180
@@ -131,7 +133,9 @@ class EmergenceCalculator():
             logging.info('JVM started using jpype1')
 
         logging.info('Successfully initialised EmergenceCalculator with buffer {psi_buffer_size} and observation window {observation_window_size}.')
-
+       
+       # writing parameters from emergenceCalculator in database.db in table 'experiment_parameters'
+        write_in_experiment_parameters_emergenceCalculator(self.use_correction, self.psi_buffer_size, self.observation_window_size, self.use_local)
 
     def initialise_calculators(self, X: np.ndarray, V: np.ndarray) -> None:
         """
@@ -236,6 +240,9 @@ class EmergenceCalculator():
 
         logging.info(f'Unfiltered Psi {self.sample_counter}: {psi}')
         logging.info(f'Filtered Psi {self.sample_counter}: {psi_filt}')
+
+        # writing in unfiltered psi and filtered psi parameters in database.db in table 'trajectories'
+        write_in_trajectories_psis(psi, psi_filt, self.sample_counter)
 
         return psi_filt
 

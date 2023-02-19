@@ -1,5 +1,6 @@
+from pickle import APPEND
 import sys, os
-from flask import Flask, jsonify, render_template, redirect, request, url_for
+from flask import Flask, jsonify, render_template, redirect, request, url_for 
 from flask.wrappers import Response
 from imutils.video import VideoStream
 import signal
@@ -12,6 +13,8 @@ from copy import deepcopy
 from camera.tools.config import parse, unparse, unwrap_hsv
 from camera.tools.colour import hsv_to_hex
 from video import VideoProcessor
+
+from camera.server.database import *
 
 awb_modes = [
     "off",
@@ -83,6 +86,9 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
     @app.route("/start_tracking")
     def start_tracking():
+        # writing date and start time of the experiment in database.db in table 'experiment_parameters'
+        write_in_experiment_parameters_start_time()
+
         if not proc.running:
             proc.start()
         return redirect(url_for("observe"))

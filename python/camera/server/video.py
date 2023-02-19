@@ -20,6 +20,9 @@ from camera.core.emergence import EmergenceCalculator, compute_macro
 from camera.core.detection import Detector
 from camera.core.tracking  import EuclideanMultiTracker
 
+# importing writing in database functions
+from camera.server.database import *
+
 
 class Camera():
     def __init__(self, cam_type: Any, config: SimpleNamespace, camera_stream = None) -> None:
@@ -479,5 +482,8 @@ class VideoProcessor():
         if self.task == 'emergence':
             if self.calc:
                 self.calc.exit()
+
+        # writing end time of the experiment in database.db in table 'experiment_parameters'
+        write_in_experiment_parameters_end_time()
 
 
