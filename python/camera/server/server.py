@@ -30,8 +30,6 @@ awb_modes = [
     "greyworld"
 ]
 
-ansible_dir_path = "../ansible"
-
 def create_app(server_type, conf, conf_path, camera_stream=None):
     app = Flask(__name__)
     app.debug = True
@@ -62,26 +60,40 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     def return_sync():
         return jsonify(proc.Sync)
 
-    @app.route("/run_ansible_set_up_scripts")
+    @app.route("/test_lights")
+    def test_lights():
+        ansible_runner.run_async(private_data_dir=ansible_dir_path, playbook='test_lights.yml', forks=10,
+                                 tags='rainbow', status_handler=status_handler)
+        return "Lights tested!"
+
+    @app.route("/run_setup_scripts")
     def run_ansible_script():
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'config_hardware.yml', forks=10, status_handler = my_status_handler)
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'install_software.yml', forks = 10, status_handler = my_status_handler)
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_time.yml', forks = 10, status_handler = my_status_handler)
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'reboot.yml', forks = 10, cmdline = '-- tags reboot', status_handler = my_status_handler)
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
-        return "Running anible set up scripts"
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='config_hardware.yml', forks=10, limit='players',
+                           status_handler=status_handler)
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='install_software.yml', forks=10, limit='players',
+                           status_handler=status_handler)
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', forks=10, limit='players',
+                           status_handler=status_handler)
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='reboot.yml', forks=10, limit='players',
+                           tags='reboot', status_handler=status_handler)
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
+                           status_handler=status_handler)
+        return "Setup scripts run!"
 
-    @app.route("/run_ansible_to_copy_latest_python_files")
+    @app.route("/run_code_sync_script")
     def run_ansible_to_copy_latest_python_files():
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_code.yml', forks = 10, status_handler = my_status_handler)
-        return "Running anible script that copies the latest python files"
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_code.yml', limit='players', forks=10,
+                           status_handler=status_handler)
+        return "Code sync script run!"
 
-    @app.route("/run_ansible_script_to_synchronise_clocks")
+    @app.route("/run_clock_sync_script")
     def run_ansible_script_to_synchronise_clocks():
-        r = ansible_runner.run(private_data_dir=ansible_dir_path, playbook = 'sync_time.yml', forks = 10, cmdline = '--tags experiment', status_handler = my_status_handler)
-        return "Running anible script to synchronise clocks for experiment"
+        ansible_runner.run(private_data_dir=ansible_dir_path, playbook='sync_time.yml', limit='players', forks=10,
+                           tags='experiment',
+                           status_handler=status_handler)
+        return "Clock synchronisation script run!"
 
-    def my_status_handler(data, runner_config):
+    def status_handler(data, runner_config):
         print(data)
 
     @app.route("/start_tracking")
@@ -99,7 +111,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             proc.stop()
         return redirect(url_for("index"))
 
-    @app.route("/calibrate", methods = [ 'GET', 'POST' ])
+    @app.route("/calibrate", methods=['GET', 'POST'])
     def calibrate():
         use_picamera = proc.config.server.CAMERA == 'pi'
 
@@ -109,8 +121,8 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             opts['detection']['min_colour'] = hsv_to_hex(vars(proc.config.detection.min_colour))
             opts['detection']['max_colour'] = hsv_to_hex(vars(proc.config.detection.max_colour))
 
-            return render_template("calibrate.html", use_picamera = use_picamera,
-                conf_path = proc.config.conf_path, save_file = False, opts = opts, awb_modes = awb_modes)
+            return render_template("calibrate.html", use_picamera=use_picamera,
+                                   conf_path=proc.config.conf_path, save_file=False, opts=opts, awb_modes=awb_modes)
         else:
             proc.update_tracking_conf(request.form['max_players'])
             proc.update_detection_conf(
@@ -119,7 +131,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
             if use_picamera:
                 proc.update_picamera(request.form['iso'], request.form['shutter_speed'],
-                    request.form['saturation'], request.form['awb_mode'])
+                                     request.form['saturation'], request.form['awb_mode'])
 
             if 'save_file' in request.form:
                 conf_path = request.form['conf_path']
@@ -132,7 +144,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
             return redirect(url_for("calibrate"))
 
-    @app.route("/observe", methods = ['GET', 'POST'])
+    @app.route("/observe", methods=['GET', 'POST'])
     def observe():
         if request.method == "POST":
             psi = int(request.form.get("manPsi"))
@@ -155,19 +167,20 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             HTTP response of corresponding type containing the generated stream
         """
         return Response(proc.generate_frame(),
-            mimetype = "multipart/x-mixed-replace; boundary=frame")
+                        mimetype="multipart/x-mixed-replace; boundary=frame")
 
     return app
 
 
 if __name__ == '__main__':
-    server_type='observer'
+    server_type = 'observer'
     if len(sys.argv) > 1:
         server_type = sys.argv[1]
 
-    host = os.environ.get('HOST', default = '0.0.0.0')
-    port = int(os.environ.get('PORT', default = '8888'))
-    conf_path = os.environ.get('CONFIG_PATH', default = './camera/config/default.yml')
+    host = os.environ.get('HOST', default='0.0.0.0')
+    port = int(os.environ.get('PORT', default='8888'))
+    conf_path = os.environ.get('CONFIG_PATH', default='./camera/config/default.yml')
+    ansible_dir_path = os.environ.get('ANSIBLE_PRIVATE_DATA_DIR', default='ansible')
     print(os.path.abspath("."))
 
     logging.info(f"Starting server, listening on {host} at port {port}, using config at {conf_path}")
@@ -182,8 +195,8 @@ if __name__ == '__main__':
         camera_stream = None
         if camera_number != None and type(camera_number) == int:
             logging.info(f"Opening Camera {camera_number}")
-            camera_stream = VideoStream(int(camera_number), framerate = config.camera.framerate)
+            camera_stream = VideoStream(int(camera_number), framerate=config.camera.framerate)
 
         create_app(server_type, config, conf_path, camera_stream=camera_stream).run(
-                host = host, port = port, debug = True,
-                threaded = True, use_reloader = False)
+            host=host, port=port, debug=True,
+            threaded=True, use_reloader=False)

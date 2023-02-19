@@ -14,6 +14,40 @@
         mode: 0644
 
 
+- name: copy ansible scripts on observer
+  tags: setup
+  hosts: observer
+  tasks:
+  - name: Copy config
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/ansible/
+      owner: pi
+      group: pi
+      mode: 0644
+    with_items:
+      - ansible.cfg
+      - hosts
+  - name: Copy files
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/ansible/files
+      owner: pi
+      group: pi
+      mode: 0644
+    with_items:
+      - boot
+      - etc
+      - lib
+  - name: Copy plays
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/ansible
+      owner: pi
+      group: pi
+      mode: 0644
+    with_fileglob: '*.yml'
+
 - name: copy tracking and streaming code on observer
   tags: setup
   hosts: observer

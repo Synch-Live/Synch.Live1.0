@@ -52,7 +52,7 @@
         - libatlas-base-dev
         - libavcodec-dev
         - libavformat-dev
-        - libgtk-3.0
+        - libgtk-3-0
         - libhdf5-dev
         - libilmbase-dev
         - libopenexr-dev
@@ -75,6 +75,16 @@
         - picamera
         - pykalman
         - pyyaml
+        - ansible
+        - ansible-runner
+      executable: pip3
+      state: latest
+
+  - name: Install camera package
+    pip:
+      name:
+        - /home/pi
+      editable: true
       executable: pip3
       state: latest
 
