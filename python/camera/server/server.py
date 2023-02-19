@@ -99,7 +99,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     @app.route("/start_tracking")
     def start_tracking():
         # writing date and start time of the experiment in database.db in table 'experiment_parameters'
-        write_in_experiment_parameters_start_time()
+        write_in_experiment_parameters_start_time() 
 
         if not proc.running:
             proc.start()

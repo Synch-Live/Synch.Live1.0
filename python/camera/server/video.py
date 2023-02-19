@@ -484,6 +484,6 @@ class VideoProcessor():
                 self.calc.exit()
 
         # writing end time of the experiment in database.db in table 'experiment_parameters'
-        write_in_experiment_parameters_end_time()
+        write_in_experiment_parameters_end_time() 
 
 

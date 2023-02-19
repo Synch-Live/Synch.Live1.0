@@ -242,7 +242,7 @@ class EmergenceCalculator():
         logging.info(f'Filtered Psi {self.sample_counter}: {psi_filt}')
 
         # writing in unfiltered psi and filtered psi parameters in database.db in table 'trajectories'
-        write_in_trajectories_psis(psi, psi_filt, self.sample_counter)
+        write_in_trajectories_psis(psi, psi_filt, self.sample_counter) 
 
         return psi_filt
 

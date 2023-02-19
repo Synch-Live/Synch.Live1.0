@@ -55,5 +55,5 @@ def write_in_experiment_parameters_end_time():
     cursor.close()
 
 ### Creating tables    
-"""create_table_trajectories()
-create_table_experiment_parameters()"""
+create_table_trajectories()
+create_table_experiment_parameters()
