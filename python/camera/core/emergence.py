@@ -127,6 +127,9 @@ class EmergenceCalculator():
 
         self.compute_macro = macro_fun
 
+        self.psi = PSI_START
+        self.psi_filt = PSI_START
+
         if not jp.isJVMStarted():
             logging.info('Starting JVM...')
             jp.startJVM(jp.getDefaultJVMPath(), '-ea', '-Djava.class.path=%s'%INFODYNAMICS_PATH)
@@ -134,9 +137,6 @@ class EmergenceCalculator():
 
         logging.info('Successfully initialised EmergenceCalculator with buffer {psi_buffer_size} and observation window {observation_window_size}.')
        
-       # writing parameters from emergenceCalculator in database.db in table 'experiment_parameters'
-        write_in_experiment_parameters_emergenceCalculator(self.use_correction, self.psi_buffer_size, self.observation_window_size, self.use_local)
-
     def initialise_calculators(self, X: np.ndarray, V: np.ndarray) -> None:
         """
         """
@@ -241,8 +241,9 @@ class EmergenceCalculator():
         logging.info(f'Unfiltered Psi {self.sample_counter}: {psi}')
         logging.info(f'Filtered Psi {self.sample_counter}: {psi_filt}')
 
-        # writing in unfiltered psi and filtered psi parameters in database.db in table 'trajectories'
-        write_in_trajectories_psis(psi, psi_filt, self.sample_counter) 
+        # updated psi attributes for database writing access
+        self.psi = psi
+        self.psi_filt = psi_filt
 
         return psi_filt
 

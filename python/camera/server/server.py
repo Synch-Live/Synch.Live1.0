@@ -96,14 +96,22 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     def status_handler(data, runner_config):
         print(data)
 
-    @app.route("/start_tracking")
+    @app.route("/start_tracking", methods=['GET','POST'])
     def start_tracking():
-        # writing date and start time of the experiment in database.db in table 'experiment_parameters'
-        write_in_experiment_parameters_start_time() 
+        if request.method == 'POST':
+            experiment_id = request.form['experiment_id']
+            experiment_location = request.form['location']
 
-        if not proc.running:
-            proc.start()
-        return redirect(url_for("observe"))
+            # writing date, start time, experiment id, location to database
+            write_in_experiment_parameters(experiment_id, experiment_location) 
+
+            # give proc attribute experiment_id for this run
+            proc.set_experiment_id(experiment_id)
+
+            if not proc.running:
+                proc.start()
+            
+            return redirect(url_for("observe"))
 
     @app.route("/stop_tracking")
     def stop_tracking():

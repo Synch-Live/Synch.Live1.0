@@ -65,3 +65,6 @@ dmypy.json
 
 # IDE files
 /.idea
+
+# Database filees
+*.db

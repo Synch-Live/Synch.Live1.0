@@ -56,9 +56,6 @@ class Detector():
         if len(boxes):
             logging.info(f"Found {len(boxes)} blobs in frame.")
 
-        # writing coordinates in database.db in table 'trajectories'
-        write_in_trajectories_player_coordinates(boxes) 
-
 
     def draw_bbox(self,
             frame:  np.ndarray,
