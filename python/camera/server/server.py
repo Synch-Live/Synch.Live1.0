@@ -1,6 +1,6 @@
 from pickle import APPEND
 import sys, os
-from flask import Flask, jsonify, render_template, redirect, request, url_for 
+from flask import Flask, jsonify, render_template, redirect, request, url_for, send_file, make_response
 from flask.wrappers import Response
 from imutils.video import VideoStream
 import signal
@@ -14,7 +14,7 @@ from camera.tools.config import parse, unparse, unwrap_hsv
 from camera.tools.colour import hsv_to_hex
 from video import VideoProcessor
 
-from camera.server.database import *
+from camera.server import database 
 
 awb_modes = [
     "off",
@@ -103,7 +103,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             experiment_location = request.form['location']
 
             # writing date, start time, experiment id, location to database
-            write_in_experiment_parameters(experiment_id, experiment_location) 
+            database.write_in_experiment_parameters(experiment_id, experiment_location) 
 
             # give proc attribute experiment_id for this run
             proc.set_experiment_id(experiment_id)
@@ -176,7 +176,32 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
         """
         return Response(proc.generate_frame(),
                         mimetype="multipart/x-mixed-replace; boundary=frame")
+    
 
+    @app.route('/download_data', methods=['GET', 'POST']) 
+    def download_data():
+        if request.method == 'POST':
+            experiment_id = request.form['experiment_id']
+
+            si = database.process_query(experiment_id)
+
+            response = make_response(si.getvalue())
+            response.headers['Content-Disposition'] = 'attachment; filename=report.csv'
+            response.headers["Content-type"] = "text/csv"
+            return response
+
+        '''
+        # query database
+        search_results = database.process_query(experiment_id)
+
+        # return as .csv download
+        return send_file(
+            search_results,
+            mimetype='text/csv',
+            download_name='Adjacency.csv',
+            as_attachment=True)
+        '''
+    
     return app
 
 

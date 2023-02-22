@@ -1,5 +1,7 @@
 import sqlite3
 import datetime
+import csv
+from io import StringIO
 
 today = datetime.date.today().strftime('%Y-%m-%d')
 datapath = './database.db'
@@ -93,6 +95,27 @@ def write_in_experiment_parameters_end_time(experiment_id):
         (datetime.datetime.now().strftime('%H:%M:%S'), experiment_id, today))
     cursor.commit()
     cursor.close()
+
+### QUERY DATABASE ###
+def process_query(experiment_id):
+
+    connection = sqlite3.connect(datapath)
+    cursor = connection.cursor()
+
+    si = StringIO()
+    cw = csv.writer(si)
+    cursor.execute('''SELECT * FROM experiment_parameters WHERE experiment_id = ?''', [experiment_id])
+    rows = cursor.fetchall()
+    cw.writerow([i[0] for i in cursor.description])
+    cw.writerows(rows)
+
+    '''
+    cursor.execute(''''''SELECT * from experiment_parameters'''''')
+    search_results = cursor.fetchall()
+    '''
+    cursor.close()
+
+    return si
 
 ### Creating tables    
 create_table_trajectories()
