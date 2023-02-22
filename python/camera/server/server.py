@@ -181,26 +181,17 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
     @app.route('/download_data', methods=['GET', 'POST']) 
     def download_data():
         if request.method == 'POST':
+            
             experiment_id = request.form['experiment_id']
 
-            si = database.process_query(experiment_id)
+            response = database.process_query(experiment_id)
 
-            response = make_response(si.getvalue())
+            response = make_response(response.getvalue())
             response.headers['Content-Disposition'] = 'attachment; filename=report.csv'
             response.headers["Content-type"] = "text/csv"
+            
             return response
 
-        '''
-        # query database
-        search_results = database.process_query(experiment_id)
-
-        # return as .csv download
-        return send_file(
-            search_results,
-            mimetype='text/csv',
-            download_name='Adjacency.csv',
-            as_attachment=True)
-        '''
     
     return app
 

@@ -102,20 +102,22 @@ def process_query(experiment_id):
     connection = sqlite3.connect(datapath)
     cursor = connection.cursor()
 
-    si = StringIO()
-    cw = csv.writer(si)
-    cursor.execute('''SELECT * FROM experiment_parameters WHERE experiment_id = ?''', [experiment_id])
+    results = StringIO()
+    cw = csv.writer(results)
+
+    cursor.execute('''SELECT *
+        FROM experiment_parameters ep
+        JOIN trajectories t
+        ON ep.experiment_id=t.experiment_id
+        AND t.experiment_id = ? ''', [experiment_id])
+    
     rows = cursor.fetchall()
     cw.writerow([i[0] for i in cursor.description])
     cw.writerows(rows)
 
-    '''
-    cursor.execute(''''''SELECT * from experiment_parameters'''''')
-    search_results = cursor.fetchall()
-    '''
     cursor.close()
 
-    return si
+    return results
 
 ### Creating tables    
 create_table_trajectories()
