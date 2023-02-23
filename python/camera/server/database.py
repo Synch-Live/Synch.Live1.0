@@ -105,17 +105,9 @@ def process_query(experiment_id):
     results = StringIO()
     cw = csv.writer(results)
   
-    cursor.execute('''SELECT ep.*, 
-                t.player_id, 
-                t.frame_id, 
-                t.position_x, 
-                t.position_y, 
-                t.position_w, 
-                t.position_h, 
-                t.unfiltered_psi, 
-                t.filtered_psi
+    cursor.execute('''SELECT *
         FROM trajectories t
-        LEFT JOIN experiment_parameters ep
+        JOIN experiment_parameters ep
         ON ep.experiment_id=t.experiment_id
         AND t.experiment_id = ? 
         ORDER BY t.frame_id, t.player_id''', [experiment_id])
