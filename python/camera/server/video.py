@@ -341,8 +341,9 @@ class VideoProcessor():
         bboxes  = self.detector.detect_colour(frame)
         self.positions = self.tracker.update(bboxes)
         
-        # writing coordinates in database.db in table 'trajectories'
-        write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes) 
+        #writing start coordinates in database.db in table 'trajectories'
+        if self.frame_id == 0:
+            write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes) 
 
         if self.config.tracking.annotate:
             frame = self.detector.draw_annotations(frame, self.positions)
@@ -366,9 +367,6 @@ class VideoProcessor():
                 bboxes = self.detector.detect_colour(frame)
                 self.positions = self.tracker.update(bboxes)
 
-                # writing coordinates in database.db in table 'trajectories'
-                write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes) 
-
                 if self.task == 'emergence':
                     if len(self.positions) > 1:
                         # compute emergence of positions and update psi
@@ -391,9 +389,6 @@ class VideoProcessor():
                 # writing to database.db in table 'trajectories'
                 write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes)
                 write_in_trajectories_psis(self.calc.psi, self.calc.psi_filt, self.experiment_id, self.frame_id) 
- 
-            # update frame id for database
-            self.frame_id += 1
 
 
     def generate_frame(self) -> Generator[bytes, None, None]:
