@@ -6,7 +6,7 @@ from io import StringIO
 today = datetime.date.today().strftime('%Y-%m-%d')
 datapath = './database.db'
 
-#CREATING TABLE TRAJECTORIES
+# creating table 'trajectories' in database.db
 def create_table_trajectories():
     cursor = sqlite3.connect(datapath)
     #cursor.execute('DROP TABLE IF EXISTS trajectories')
@@ -16,12 +16,13 @@ def create_table_trajectories():
                 frame_id integer, 
                 position_x real, 
                 position_y real, 
-                position_w real, 
-                position_h real, 
                 unfiltered_psi real, 
                 filtered_psi real)''')
     cursor.close()
 
+# writing 'experiment_id', 'player_id', 'frame_id' and coordinates 'position_x' and 'position_y' in table 'trajectories'
+# 'position_x' is calculated by x-w/2
+# 'position_y' is calculated by y-h/2
 def write_in_trajectories_player_coordinates(experiment_id, frame_id, boxes):
     cursor = sqlite3.connect(datapath)
     for i, box in enumerate(boxes):
@@ -30,13 +31,12 @@ def write_in_trajectories_player_coordinates(experiment_id, frame_id, boxes):
         player_id, 
         frame_id, 
         position_x, 
-        position_y, 
-        position_w, 
-        position_h) values (?, ?, ?, ?, ?, ?, ?)''', 
-        (experiment_id, (i + 1), frame_id, box[0], box[1], box[2], box[3]))
+        position_y) values (?, ?, ?, ?, ?)''', 
+        (experiment_id, (i + 1), frame_id, box[0]-(box[2]/2), box[1]-(box[3]/2)))
     cursor.commit()
     cursor.close()
 
+# writing 'unfiltered_psi' and 'filtered_psi' for specified 'experiment_id' and 'frame_id' in table 'trajectories'
 def write_in_trajectories_psis(psi_u, psi_f, experiment_id, frame_id):
     cursor = sqlite3.connect(datapath)
     cursor.execute('''UPDATE trajectories SET 
@@ -47,7 +47,7 @@ def write_in_trajectories_psis(psi_u, psi_f, experiment_id, frame_id):
     cursor.close()
 
 
-#CREATING TABLE EXPERIMENT_PARAMETERS
+# creating table 'experiment_parameters' in database.db
 def create_table_experiment_parameters():
     cursor = sqlite3.connect(datapath)
     #cursor.execute('DROP TABLE IF EXISTS experiment_parameters')
@@ -65,6 +65,7 @@ def create_table_experiment_parameters():
                 sigmoid_b real)''')
     cursor.close()
 
+# writing 'experiment_id','location', 'date' and 'start_time' in table 'experiment_parameters'
 def write_in_experiment_parameters(experiment_id, experiment_location):
     cursor = sqlite3.connect(datapath)
     cursor.execute('''INSERT INTO experiment_parameters 
@@ -76,6 +77,8 @@ def write_in_experiment_parameters(experiment_id, experiment_location):
     cursor.commit()
     cursor.close()
 
+# writing 'use_correction', 'psi_buffer_size', 'observation_window_size' and 'use_local' 
+# for specified 'experiment_id' and 'date' in table 'experiment_parameters'
 def write_in_experiment_parameters_emergenceCalculator(use_correction, psi_buffer_size, 
                                                        observation_window_size, use_local, experiment_id):
     cursor = sqlite3.connect(datapath)
@@ -88,6 +91,7 @@ def write_in_experiment_parameters_emergenceCalculator(use_correction, psi_buffe
     cursor.commit()
     cursor.close()
 
+# writing 'end_time' for specified 'experiment_id' and 'date' in table 'experiment_parameters'
 def write_in_experiment_parameters_end_time(experiment_id):
     cursor = sqlite3.connect(datapath)
     cursor.execute('''UPDATE experiment_parameters SET end_time = ? 
@@ -96,9 +100,10 @@ def write_in_experiment_parameters_end_time(experiment_id):
     cursor.commit()
     cursor.close()
 
-### QUERY DATABASE ###
-def process_query(experiment_id):
 
+# creating a query that joins tables 'trajectories' and 'experiment_parameters'
+# the result is placed into 'csv' file
+def process_query(experiment_id):
     connection = sqlite3.connect(datapath)
     cursor = connection.cursor()
 
@@ -108,10 +113,10 @@ def process_query(experiment_id):
     cursor.execute('''SELECT *
         FROM trajectories t
         JOIN experiment_parameters ep
-        ON ep.experiment_id=t.experiment_id
-        AND t.experiment_id = ? 
+        USING (experiment_id)
+        WHERE t.experiment_id = ? 
         ORDER BY t.frame_id, t.player_id''', [experiment_id])
-    
+
     rows = cursor.fetchall()
     cw.writerow([i[0] for i in cursor.description])
     cw.writerows(rows)
@@ -120,6 +125,6 @@ def process_query(experiment_id):
 
     return results
 
-### Creating tables    
+# creating tables 'trajectories' and 'experiment_parameters' in database.db    
 create_table_trajectories()
 create_table_experiment_parameters()
