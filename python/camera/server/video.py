@@ -198,6 +198,10 @@ class VideoProcessor():
         elif self.task == 'emergence':
             a = 0
             b = 3
+
+            #writing sigmoids in database.db in table 'experiment_parameters'
+            write_in_experiment_parameters_sigmoids(a, b, self.experiment_id)
+
             return 1.0 / (1 + np.exp((self.psi - a) / b))
         else:
             return self.psi
@@ -341,7 +345,7 @@ class VideoProcessor():
         bboxes  = self.detector.detect_colour(frame)
         self.positions = self.tracker.update(bboxes)
         
-        #writing start coordinates in database.db in table 'trajectories'
+        # writing start coordinates in database.db in table 'trajectories'
         if self.frame_id == 0:
             write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes) 
 
@@ -506,7 +510,7 @@ class VideoProcessor():
         # writing end time of the experiment in database.db in table 'experiment_parameters'
         # TO DO: Does not execute if called after closing video stream due to threading issues
         write_in_experiment_parameters_end_time(self.experiment_id) 
-        
+
         # updating frame id at the end of the experiment
         self.frame_id = 0
 

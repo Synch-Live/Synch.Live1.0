@@ -39,5 +39,7 @@ This table contains `experiment_id` inputted by the user on the app,
 `experiment_id`, `location`,`date` and `start_time` parameters of the table are being filled in `server.py` 
 when we `start_tracking` by calling `write_in_experiment_parameters` function in `database.py`.
 The other parameters of this table are being filled in `video.py` 
-by calling `write_in_experiment_parameters_emergenceCalculator` and `write_in_experiment_parameters_end_time`
-functions in `database.py`.
+by calling `write_in_experiment_parameters_emergenceCalculator`, `write_in_experiment_parameters_sigmoids` and `write_in_experiment_parameters_end_time` functions in `database.py`.
+
+Note: to write `sigmoid_a` and `sigmoid_b` to database, a function `write_in_experiment_parameters_sigmoids`
+was added to the function `Sync(self)` in `video.py` to retrieve them and `Sync(self)` is being called in `server.py`.

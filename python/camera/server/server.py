@@ -160,6 +160,9 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
 
             if use_psi:
                 proc.task = 'emergence'
+
+                # writing sigmoids to database
+                proc.Sync
             else:
                 proc.set_manual_psi(psi)
             return render_template("observe.html", running_text=is_running(), psi=proc.psi, task=proc.task)

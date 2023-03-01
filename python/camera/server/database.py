@@ -77,6 +77,16 @@ def write_in_experiment_parameters(experiment_id, experiment_location):
     cursor.commit()
     cursor.close()
 
+# writing 'sigmoid_a' and 'sigmoid_b' for specified 'experiment_id' and 'date' in table 'experiment_parameters'
+def write_in_experiment_parameters_sigmoids(sigmoid_a, sigmoid_b, experiment_id):
+    cursor = sqlite3.connect(datapath)
+    cursor.execute('''UPDATE experiment_parameters SET 
+        sigmoid_a = ?, 
+        sigmoid_b = ? WHERE experiment_id = ? and date = ?''', 
+        (sigmoid_a, sigmoid_b, experiment_id, today))
+    cursor.commit()
+    cursor.close()
+
 # writing 'use_correction', 'psi_buffer_size', 'observation_window_size' and 'use_local' 
 # for specified 'experiment_id' and 'date' in table 'experiment_parameters'
 def write_in_experiment_parameters_emergenceCalculator(use_correction, psi_buffer_size, 
