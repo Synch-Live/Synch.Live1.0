@@ -6,7 +6,8 @@ The code for database is located in `python/camera/server/database.py`.
 
 ### Running an experiment and getting a database
 Once you launch `server.py` app, you can input `Experimet id` and `Experiment location` and press `Start tracking`.
-A `database.db` is created automatically once you start tracking (if it doesn't already exist) in `python` directory.
+A `database.db` is created automatically once you launch the app (if it doesn't already exist) in `python` directory.
+Also, it automatically deletes all the data that is older than 7 days from today.
 All the findings are being written to the database once the experiment is running. 
 When `Stop Tracking` is pressed, the database can be downloaded. On the main app page, you can input `Experiment id`
 and press `Get trajectories`. A database will be downloaded in `csv` format for the particular experiment id.

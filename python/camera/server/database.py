@@ -135,6 +135,36 @@ def process_query(experiment_id):
 
     return results
 
+# creating a query that deletes all the rows in tables 'trajectories' and 'experiment_parameters' where 'date' column 
+# has dates that are older than a week from today (current date).
+def clean_query():
+    connection = sqlite3.connect(datapath)
+    cursor = connection.cursor()
+
+    # after this number of days we delete data from the database
+    days_ago = 7
+
+    # calculate the date 7 days ago from the current date
+    date_cutoff = (datetime.datetime.now() - datetime.timedelta(days=days_ago)).date()
+
+    # deleting from the table 'trajectories'
+    cursor.execute('''DELETE 
+        FROM trajectories
+        WHERE experiment_id IN (SELECT experiment_id FROM experiment_parameters WHERE date(date) <= date(?))''', [date_cutoff])
+    connection.commit()
+
+    # deleting from the table 'experiment_parameters'
+    cursor.execute('''DELETE
+        FROM experiment_parameters 
+        WHERE date(date) <= date(?)''', [date_cutoff])
+
+    connection.commit()
+    connection.close()
+
+
 # creating tables 'trajectories' and 'experiment_parameters' in database.db    
 create_table_trajectories()
 create_table_experiment_parameters()
+
+# cleaning old data in tables 'trajectories' and 'experiment_parameters' in database.db 
+clean_query()
