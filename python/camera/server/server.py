@@ -180,7 +180,7 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
         return Response(proc.generate_frame(),
                         mimetype="multipart/x-mixed-replace; boundary=frame")
     
-
+       
     @app.route('/download_data', methods=['GET', 'POST']) 
     def download_data():
         if request.method == 'POST':
@@ -192,8 +192,14 @@ def create_app(server_type, conf, conf_path, camera_stream=None):
             response = make_response(response.getvalue())
             response.headers['Content-Disposition'] = 'attachment; filename=report.csv'
             response.headers["Content-type"] = "text/csv"
-            
+     
             return response
+       
+    @app.route('/experiments')
+    def experiments():
+        experiments = database.get_all_experiment_ids_query() 
+
+        return render_template('experiments.html', experiments=experiments)
 
     
     return app

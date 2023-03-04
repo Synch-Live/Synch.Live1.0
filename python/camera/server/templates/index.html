@@ -17,6 +17,7 @@
       <li><a href="/stop_tracking" >Stop Tracking</a></li>
       <li><a href="/calibrate" >Calibrate PiCamera (tracking must be started)</a></li>
       <li><a href="/observe" >Observe running experiment</a></li>
+      <p>Review the list of existing <a href="{{ url_for('experiments') }}">Experiment IDs</a></p>
       <form action="{{ url_for('download_data') }}" method="post">
         <p>Experiment id<input type = "text" id = "experiment_id" name = "experiment_id" /></p>      
         <input type="submit" value="Get trajectories">

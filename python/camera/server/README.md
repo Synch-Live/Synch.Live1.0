@@ -1,16 +1,18 @@
 # Synch.Live database connection
 
 A database is created to store trajectories and experiment parameters using 'sqlite3'.
-The database holdstwo tables `trajectories` and `experiment_parameters`.
+The database holds two tables `trajectories` and `experiment_parameters`.
 The code for database is located in `python/camera/server/database.py`.
 
 ### Running an experiment and getting a database
 Once you launch `server.py` app, you can input `Experimet id` and `Experiment location` and press `Start tracking`.
 A `database.db` is created automatically once you launch the app (if it doesn't already exist) in `python` directory.
 Also, it automatically deletes all the data that is older than 7 days from today.
-All the findings are being written to the database once the experiment is running. 
+All the findings are being written to the database when an experiment is running. 
 When `Stop Tracking` is pressed, the database can be downloaded. On the main app page, you can input `Experiment id`
 and press `Get trajectories`. A database will be downloaded in `csv` format for the particular experiment id.
+If you want to check a list of existing experiment ids stored in the database, 
+you can press "Review the list of existing `Experiment IDs`".
 
 ### `trajectories` TABLE
 This table contains `experiment_id` inputted by the user on the app, 
@@ -44,3 +46,11 @@ by calling `write_in_experiment_parameters_emergenceCalculator`, `write_in_exper
 
 Note: to write `sigmoid_a` and `sigmoid_b` to database, a function `write_in_experiment_parameters_sigmoids`
 was added to the function `Sync(self)` in `video.py` to retrieve them and `Sync(self)` is being called in `server.py`.
+
+### experiments.html
+In order to have a new page with a list of distinct experiment ids stored in database, `experiments.html` 
+file was created in `python/camera/server/templates` directory.
+An extra button to redirect to this page was added in `index.html`.
+In order to get distinct `experiment_id` from database, `get_all_experiment_ids_query` function was created in `database.py`.
+In `server.py` a new route and a function `experiments` were added to enable adding this button to the web app and to
+connect with `experiments.html`.
