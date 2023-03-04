@@ -23,6 +23,9 @@ from synch_live.camera.core.emergence import EmergenceCalculator, compute_macro
 from synch_live.camera.core.detection import Detector
 from synch_live.camera.core.tracking import EuclideanMultiTracker
 
+# importing writing in database functions
+from synch_live.camera.server.db import *
+
 
 class Camera():
     def __init__(self, cam_type: Any, config: SimpleNamespace, camera_stream=None) -> None:
@@ -135,6 +138,7 @@ class VideoProcessor():
         """
         self.config = config
         self.running = False
+        self.experiment_id = 'None'
 
         record = self.config.server.RECORD
         record_path = self.config.server.RECORD_PATH
@@ -151,6 +155,7 @@ class VideoProcessor():
         # initialize the output frame and a lock used to ensure thread-safe
         # exchanges of the output frames (useful when multiple browsers/tabs
         # are viewing the stream)
+        self.frame_id = 0
         self.output_frame = None
 
         self.video_stream = None
@@ -180,7 +185,13 @@ class VideoProcessor():
         elif self.task == 'emergence':
             a = 0
             b = 3
+            
+            #writing sigmoids in database.db in table 'experiment_parameters'
+            write_in_experiment_parameters_sigmoids(a, b, self.experiment_id)
+
             return 1.0 / (1 + np.exp((self.psi - a) / b))
+        
+
         else:
             return self.psi
 
@@ -318,6 +329,10 @@ class VideoProcessor():
         bboxes = self.detector.detect_colour(frame)
         self.positions = self.tracker.update(bboxes)
 
+        # writing start coordinates in database.db in table 'trajectories'
+        if self.frame_id == 0:
+            write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes) 
+
         if self.config.tracking.annotate:
             frame = self.detector.draw_annotations(frame, self.positions)
 
@@ -329,6 +344,9 @@ class VideoProcessor():
         while self.running:
             with self.lock:
                 frame = self.video_stream.read()
+
+                if frame is not None:
+                    self.frame_id += 1
 
                 if frame is not None and self.record:
                     self.video_writer.write(frame)
@@ -355,6 +373,11 @@ class VideoProcessor():
                 # acquire the lock, set the output frame, and release the lock
                 with self.lock:
                     self.output_frame = frame.copy()
+
+                # writing to database.db in table 'trajectories'
+                write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes)
+                write_in_trajectories_psis(self.calc.psi, self.calc.psi_filt, self.experiment_id, self.frame_id) 
+
 
     def generate_frame(self) -> Generator[bytes, None, None]:
         """
@@ -434,6 +457,14 @@ class VideoProcessor():
             elif self.task == '':
                 logging.info("No task specified, continuing")
 
+            # writing parameters from emergenceCalculator to database table 'experiment_parameters'
+            write_in_experiment_parameters_emergenceCalculator(self.calc.use_correction, 
+                                    self.calc.psi_buffer_size, 
+                                    self.calc.observation_window_size, 
+                                    self.calc.use_local,
+                                    self.experiment_id)
+
+
             logging.info("Initialised VideoProcessor with params:")
             logging.info(f"camera type: {self.config.server.CAMERA}")
             logging.info(f"task: {self.task}")
@@ -459,6 +490,10 @@ class VideoProcessor():
         logging.info('Stopping tracking thread...')
         self.running = False
 
+         # writing end time of the experiment in database.db in table 'experiment_parameters'
+        # TO DO: Does not execute if called after closing video stream due to threading issues
+        write_in_experiment_parameters_end_time(self.experiment_id)
+
         if self.video_stream:
             logging.info('Closing video streamer...')
             self.video_stream.stop()
@@ -477,6 +512,7 @@ class VideoProcessorProxy:
     video_processor = None
 
     def __init__(self, config_path=None):
+
         if self.__class__.video_processor is None:
             if not os.path.exists(config_path):
                 raise Exception
@@ -491,6 +527,9 @@ class VideoProcessorProxy:
                     logging.info(f"Opening Camera {camera_number}")
                     camera_stream = VideoStream(int(camera_number), framerate=config.camera.framerate)
                 self.__class__.video_processor = VideoProcessor(config, camera_stream)
+
+    def set_experiment_id(self, id):
+        self.__class__.video_processor.experiment_id = id
 
     @property
     def config(self) -> SimpleNamespace:
