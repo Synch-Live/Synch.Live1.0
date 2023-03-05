@@ -4,7 +4,7 @@ from flask import Flask, render_template, url_for
 from . import download, download
 
 from synch_live.camera.video.video import VideoProcessorProxy
-#from synch_live.camera.server import db
+from synch_live.camera.server.db import *
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -51,6 +51,9 @@ def create_app(test_config=None):
 
     config_path = app.config.get_namespace('VIDEO_').get('config')
     VideoProcessorProxy(config_path)
+
+    #cleanup database
+    clean_query()
 
     #db.init_app(app)
 
