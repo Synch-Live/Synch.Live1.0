@@ -36,14 +36,8 @@ def control():
 
 
 
-@bp.route('/start', methods=['GET', 'POST'])
+@bp.route('/start')
 def start_tracking():
-    experiment_id = "test"
-    experiment_location = "home"
-
-    # writing date, start time, experiment id, location to database
-    write_in_experiment_parameters(experiment_id, experiment_location) 
-
     VideoProcessorProxy().start()
     return redirect(url_for('experiment.observe'))
 
