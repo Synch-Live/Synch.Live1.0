@@ -51,7 +51,7 @@ def start_tracking():
 @bp.route('/stop')
 def stop_tracking():
     VideoProcessorProxy().stop()
-    return redirect(url_for('main'))
+    return redirect(url_for('tracking.control'))
 
 
 @bp.route('/sync')
