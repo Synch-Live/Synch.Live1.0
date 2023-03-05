@@ -56,6 +56,8 @@ def create_app(test_config=None):
     clean_query()
 
     #db.init_app(app)
+    from .plotlydash.dashboard import init_dashboard
+    app = init_dashboard(app)
 
     return app
 
