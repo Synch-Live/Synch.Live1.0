@@ -12,7 +12,12 @@ The code contains four folders:
 ## Installation for development
 
 1. Clone the Observer branch
-2. Go to the `python/` folder and create a virtual environment with Python 3.7. This specific version of Python is required to run the `openCV` package successfully on the Pi (so it is good practice to ensure you use the same version for development). Do not use a more recent version, or you are likely to have trouble getting your code to run on the Observer.
+2. Go to the `python/` folder and create a virtual environment with Python 3.7. This specific version of Python is required to run the `openCV` package successfully on the Pi (so it is good practice to ensure you use the same version for development). Do not use a more recent version, or you are likely to have trouble getting your code to run on the Observer. To create and activate a victual enfironment:
+```
+cd python
+python3.7 venv venv
+source venv/bin/activate
+```
 3. Install the requirements by running the following code **from within your virtual environment** (notice the full stop after the e):
 ```
 cd Synch.Live1.0/python
