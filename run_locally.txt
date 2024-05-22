@@ -1,0 +1,35 @@
+Install Node.js
+Install nvm (https://github.com/nvm-sh/nvm)
+
+
+In terminal a window:
+
+cd Synch.Live1.0
+
+cd python
+python3 -m venv env
+source env/bin/activate
+python -m pip install -r requirements.txt
+
+cd python/synch_live/camera/server
+nvm use 20
+npm install
+
+cd Synch.Live1.0/python
+env/bin/flask --app synch_live/camera/server run --debug
+
+Observer webpage should now be running at:
+http://localhost:5000/
+
+
+
+In another Terminal window:
+
+cd Synch.Live1.0
+cd python
+source env/bin/activate
+
+python -m synch_live.leds.server.server
+
+This hat's webpage should now be available at:
+http://localhost:5001/

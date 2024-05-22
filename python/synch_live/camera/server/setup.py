@@ -5,7 +5,6 @@ from typing import Any
 from array import array
 from threading import Lock
 
-from ansible_runner import Runner
 from flask import Blueprint, url_for, redirect, render_template, current_app, get_template_attribute, \
     stream_with_context, Response, request
 import ansible_runner

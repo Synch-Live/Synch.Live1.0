@@ -2,12 +2,17 @@ import os
 import yaml
 import socket
 from flask import Flask, render_template, request, redirect, url_for
-from leds.ws2801_headset import WS2801Headset
+# from synch_live.leds.ws2801_headset import WS2801Headset
+from synch_live.leds.headset import Headset
 
+class MockHeadSet(Headset):
+    def __init__(self):
+        nothing = 0
 
 def create_app(server_type):
     app = Flask(__name__)
-    leds = WS2801Headset((0, 0, 100), (0, 255, 0), 0.5, 1.5)
+    # leds = WS2801Headset((0, 0, 100), (0, 255, 0), 0.5, 1.5)
+    leds = MockHeadSet()
     ipAddress = socket.gethostbyname(socket.gethostname())
     lastTwoDigits = ipAddress.split(".")[-1][-2:]
 
@@ -188,4 +193,4 @@ if __name__ == '__main__':
     server_type = 'hats'
 
     app = create_app(server_type)
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

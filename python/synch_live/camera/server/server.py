@@ -10,7 +10,7 @@ from copy import deepcopy
 
 from synch_live.camera.tools.config import parse, unparse, unwrap_hsv
 from synch_live.camera.tools.colour import hsv_to_hex
-from synch_live.camera.video.video import VideoProcessorProxy
+from synch_live.camera.video import VideoProcessor
 
 awb_modes = [
     "off",

@@ -12,11 +12,8 @@ import Adafruit_WS2801 as LED
 import Adafruit_GPIO.SPI as SPI
 import RPi.GPIO as GPIO
 
-# initialise logging to file
-import leds.logger
-
 # import abstract headset class
-from leds.headset import Headset
+from synch_live.leds.headset import Headset
 
 """
 Class implementing the behaviour of a LED headset on an actual RaspberryPi
