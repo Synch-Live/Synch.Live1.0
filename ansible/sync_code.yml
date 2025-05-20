@@ -14,12 +14,12 @@
         mode: 0644
 
 
-- name: copy tracking and streaming code on observer
+- name: Copy tracking and streaming code on observer
   tags: setup
   hosts: observer
+  # TODO: update to copy changes made to the student's files
 
   tasks:
-
   - name: Create synch folder
     file:
       path: "{{ item }}"
@@ -96,7 +96,38 @@
       - camera/tools/config.py
 
 
-- name: copy LED control code on all players
+- name: Service config files for observer
+  tags: setup
+  hosts: observer
+  become: true
+
+  tasks:
+
+    - name: Copy systemd service
+      copy:
+        src: lib/systemd/system/synch-live-observer-server.service
+        dest: /lib/systemd/system/synch-live-observer-server.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Copy avahi service
+      copy:
+        src: etc/avahi/services/synch-live-observer.service
+        dest: /etc/avahi/services/synch-live-observer.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Reload systemd to pick up changes
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: Start service
+      ansible.builtin.systemd:
+        name: synch-live-observer-server 
+        state: restarted
+      become: yes
+
+
+- name: Copy LED control code on all players
   tags: setup
   hosts: players
 
@@ -107,20 +138,74 @@
       path: "{{ item }}"
       state: directory
     with_items:
-      - '/home/pi/leds'
-      - '/home/pi/logs'
+      - '/home/pi/synch-live'
+      - '/home/pi/synch-live/leds'
+      - '/home/pi/synch-live/leds/server'
+      - '/home/pi/synch-live/leds/server/templates'
+      - '/home/pi/synch-live/leds/server/static'
+      - '/home/pi/synch-live/logs'
   - name: Copy LED light control Python scripts
     copy:
       src: "{{ item }}"
-      dest: /home/pi/leds
+      dest: /home/pi/synch-live/leds
       owner: pi
       group: pi
       mode: 0644
     with_fileglob: leds/*.py
+  - name: Copy server code
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/synch-live/leds/server
+      owner: pi
+      group: pi
+      mode: 0644
+    with_fileglob: leds/server/*.py
+  - name: Copy server template code
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/synch-live/leds/server/templates
+      owner: pi
+      group: pi
+      mode: 0644
+    with_fileglob: leds/server/templates/*.html
+  - name: Copy server static code
+    copy:
+      src: "{{ item }}"
+      dest: /home/pi/synch-live/leds/server/static
+      owner: pi
+      group: pi
+      mode: 0644
+    with_fileglob: leds/server/static/*
 
-  - name: Add cron job for startup
-    cron:
-      name: 'startup_pilot'
-      special_time: reboot
-      state: present
-      job: 'python3 /home/pi/leds/startup.py'
+
+
+- name: Service config files for players
+  tags: setup
+  hosts: players
+  become: true
+
+  tasks:
+
+    - name: Copy systemd service
+      copy:
+        src: lib/systemd/system/synch-live-player-server.service
+        dest: /lib/systemd/system/synch-live-player-server.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Copy avahi service
+      copy:
+        src: etc/avahi/services/synch-live-player.service
+        dest: /etc/avahi/services/synch-live-player.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Reload systemd to pick up changes
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: Start service
+      ansible.builtin.systemd:
+        name: synch-live-player-server 
+        state: restarted
+      become: yes
+

@@ -12,8 +12,8 @@ def create_app(server_type):
     lastTwoDigits = ipAddress.split(".")[-1][-2:]
 
     def loadHexFromYaml():
-        if os.path.exists('leds/server/config.yaml'):
-            with open('leds/server/config.yaml', 'r') as f:
+        if os.path.exists('synch-live/leds/server/config.yaml'):
+            with open('synch-live/leds/server/config.yaml', 'r') as f:
                 rgb = yaml.load(f, Loader=yaml.FullLoader)
                 origColour = rgb['hexColor']
                 origColour2 = rgb['hexColor2']
@@ -24,8 +24,8 @@ def create_app(server_type):
             return '#000000','#FFFFFF', 1, 10
 
     def loadOnlyRGB1FromYaml():
-        if os.path.exists('leds/server/config.yaml'):
-            with open('leds/server/config.yaml', 'r') as f:
+        if os.path.exists('synch-live/leds/server/config.yaml'):
+            with open('synch-live/leds/server/config.yaml', 'r') as f:
                 rgb = yaml.load(f, Loader=yaml.FullLoader)
                 r1 = rgb['r']
                 g1 = rgb['g']
@@ -37,8 +37,8 @@ def create_app(server_type):
             return 255,255,255, 1, 10
 
     def loadBothRGBFromYaml():
-        if os.path.exists('leds/server/config.yaml'):
-            with open('leds/server/config.yaml', 'r') as f:
+        if os.path.exists('synch-live/leds/server/config.yaml'):
+            with open('synch-live/leds/server/config.yaml', 'r') as f:
                 rgb = yaml.load(f, Loader=yaml.FullLoader)
                 r1 = rgb['r']
                 g1 = rgb['g']
@@ -53,7 +53,7 @@ def create_app(server_type):
             return 0, 0, 0, 255, 255, 255, 1, 10
 
     def webpage():
-        if os.path.exists('leds/server/config.yaml'):
+        if os.path.exists('synch-live/leds/server/config.yaml'):
             hexCol, hexCol2, freq, dur = loadHexFromYaml()
             return render_template('hat_standalone.html',
                                    lastTwoDigits=lastTwoDigits, origCol=hexCol, origCol2=hexCol2, freq=freq, dur=dur)
@@ -130,9 +130,9 @@ def create_app(server_type):
 
     @app.route('/startButton')
     def startButton():
-        if os.path.exists('leds/server/config.yaml'):
+        if os.path.exists('synch-live/leds/server/config.yaml'):
             # load RGB values from YAML file
-            with open('leds/server/config.yaml', 'r') as f:
+            with open('synch-live/leds/server/config.yaml', 'r') as f:
                 r,g,b,freq,dur = loadOnlyRGB1FromYaml()
                 leds.crown_run_config(r=r, g=g, b=b, blink_freq=freq, effect_dur=dur)
         else:
@@ -147,8 +147,8 @@ def create_app(server_type):
 
     @app.route('/clearButton')
     def clearButton():
-        if os.path.exists("leds/server/config.yaml"):
-            os.remove("leds/server/config.yaml")
+        if os.path.exists("synch-live/leds/server/config.yaml"):
+            os.remove("synch-live/leds/server/config.yaml")
         return webpage()
 
     @app.route('/handle_color_picker', methods=['POST'])
@@ -173,7 +173,7 @@ def create_app(server_type):
             leds.crown_trial_config(r=r, g=g, b=b, blink_freq=frequency, effect_dur=duration)
         elif 'saveConfigButton' in request.form:
             # Save the configuration to YAML file
-            with open('leds/server/config.yaml', 'w') as f:
+            with open('synch-live/leds/server/config.yaml', 'w') as f:
                 yaml.dump({'hexColor': origCol, 'hexColor2': origCol2, 'r': r, 'g': g, 'b': b, 'r2': r2, 'g2': g2,
                            'b2': b2, 'frequency': frequency, 'duration': duration}, f)
 
