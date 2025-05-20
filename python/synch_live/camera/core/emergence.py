@@ -133,7 +133,7 @@ class EmergenceCalculator():
             jp.startJVM(jp.getDefaultJVMPath(), '-ea', '-Djava.class.path=%s'%INFODYNAMICS_PATH)
             logging.info('JVM started using jpype1')
 
-        logging.info('Successfully initialised EmergenceCalculator with buffer {psi_buffer_size} and observation window {observation_window_size}.')
+        logging.info(f'Successfully initialised EmergenceCalculator with buffer {psi_buffer_size} and observation window {observation_window_size}.')
 
 
     def initialise_calculators(self, X: np.ndarray, V: np.ndarray) -> None:
