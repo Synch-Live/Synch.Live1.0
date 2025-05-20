@@ -1,0 +1,11 @@
+[Unit]
+Description=Server for Synch.Live player control interface.
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/synch-live/
+Type=simple
+ExecStart=python3 -m leds.server.server 
+
+[Install]
+WantedBy=multi-user.target
