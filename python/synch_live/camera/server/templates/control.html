@@ -33,8 +33,9 @@
         </div>
         {{ render_form(form, 'Save') }}
         {% call render_section('Camera calibration') %}
-            {% call render_label('Pi Camera is not enabled.') %}
-            {% endcall %}
+
+	<img src="{{ url_for('tracking.feed', nonce=time) }}" alt="Tracking feed" class="max-w-xl">
+
         {% endcall %}
     {% endif %}
 {% endblock %}
