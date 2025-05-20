@@ -13,7 +13,7 @@ from mockloop import mock_loop
 # initialise logging to file
 import leds.logger
 
-PSI_URL = 'http://observer:8888/sync'
+PSI_URL = 'http://observer:5000/tracking/sync'
 # people do not often perceive difference in delays shorter than 40ms
 DELAY_THRESHOLD = 0.035
 
