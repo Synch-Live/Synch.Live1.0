@@ -4,6 +4,7 @@ import signal
 from multiprocessing import current_process
 from types import SimpleNamespace
 from typing import Generator
+import time
 
 from flask import current_app
 from imutils.video import VideoStream
@@ -67,6 +68,7 @@ class VideoProcessorServer:
         if not VideoProcessorServer.processor.running:
             VideoProcessorServer.processor.start()
 
+
     @staticmethod
     def stop():
         if VideoProcessorServer.processor and VideoProcessorServer.processor.running:
@@ -83,10 +85,13 @@ class VideoProcessorServer:
         VideoProcessorServer.processor.update_detection_conf(config.detection.min_contour, config.detection.max_contour,
                                                              hsv_to_hex(config.detection.min_colour.__dict__),
                                                              hsv_to_hex(config.detection.max_colour.__dict__))
-        if VideoProcessorServer.get_config().server.CAMERA == 'pi':
-            VideoProcessorServer.processor.update_picamera(config.iso, config.shutter_speed, config.saturation,
-                                                           config.awb_mode)
+        if config.server.CAMERA == 'pi':
+            VideoProcessorServer.processor.update_picamera_conf(config.camera.iso, config.camera.shutter_speed,
+                                                                config.camera.saturation, config.camera.awb_mode)
+            VideoProcessorServer.processor.update_picamera()
+            time.sleep(2)
 
+ 
     @staticmethod
     def get_running() -> bool:
         return VideoProcessorServer.processor.running

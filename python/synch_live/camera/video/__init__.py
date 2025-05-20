@@ -216,6 +216,7 @@ class VideoProcessor():
 
         Side-effects
         ------
+            - edit config
             - reinitialise tracker
         """
         self.config.tracking.max_players = int(max_players)
@@ -240,6 +241,7 @@ class VideoProcessor():
 
         Side-effects
         ------
+            - edit config
             - reinitialise detector
         """
         self.config.detection.min_contour = int(min_contour)
@@ -255,13 +257,14 @@ class VideoProcessor():
         logging.info(f"  min_colour  : {hex_to_hsv(min_colour)} ")
         logging.info(f"  max_colour  : {hex_to_hsv(max_colour)} ")
 
-    def update_picamera(self,
+    def update_picamera_conf(self,
                         iso: int, shutter_speed: int, saturation: int, awb_mode: str
                         ) -> None:
         """
-        Following a form submission in the front-end, update picamera settings
-        with new parameters, as well as update config
+        Following a form submission in the front-end, update picamera config 
 
+        N.B. the actual camera object is updated in `update_picamera`
+ 
         Params
         ------
             iso
@@ -275,20 +278,31 @@ class VideoProcessor():
 
         Side-effects
         ------
-            - reinitialise tracker
+            - edit config
         """
         self.config.camera.iso = int(iso)
         self.config.camera.shutter_speed = int(shutter_speed)
         self.config.camera.saturation = int(saturation)
         self.config.camera.awb_mode = awb_mode
 
-        self.camera.update_settings(self.config)
-
-        logging.info(f"Updated PiCamera settings from Web UI:")
+        logging.info(f"Updated PiCamera config from Web UI:")
         logging.info(f"  iso           : {iso} ")
         logging.info(f"  shutter_speed : {shutter_speed} ")
         logging.info(f"  saturation    : {saturation} ")
         logging.info(f"  awb_mode      : {awb_mode} ")
+
+    def update_picamera(self) -> None:
+        """
+        Using picamera config, update picamera object
+
+        Side-effects
+        ------
+            - update picamera object settings
+        """
+        self.camera.update_settings(self.config)
+
+        logging.info(f"Updated PiCamera settings")
+
 
     def tracking(self) -> None:
         """
@@ -326,8 +340,8 @@ class VideoProcessor():
         self.positions = self.tracker.update(bboxes)
 
         # writing start coordinates in database.db in table 'trajectories'
-        if self.frame_id == 0:
-            write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes)
+        # if self.frame_id == 0:
+        #    write_in_trajectories_player_coordinates(self.experiment_id, self.frame_id, bboxes)
 
         if self.config.tracking.annotate:
             frame = self.detector.draw_annotations(frame, self.positions)

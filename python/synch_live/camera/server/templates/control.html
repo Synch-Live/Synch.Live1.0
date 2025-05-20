@@ -22,20 +22,53 @@
     {% if tab == 'control' %}
         <div>
             <p>Enter the experiment ID and location, then click 'Start!'</p>
-            <p>Go to 'Calibrate' first if you want to update the experiment settings.</p>
+            <p>Go to 'Calibrate' first if you want to update the experiment settings (this will start video recording for preview purposes).</p>
         </div>
         {{ render_form(form, 'Start!')}}
     {% elif tab == 'calibrate' %}
         <div>
             <p>The inputs are autofilled with the current settings.</p>
-            <p>To update settings, press 'Save'.</p>
-            <p>Go to 'Play' to start an experiment.</p>
+            <p>To update settings, press 'Save'. </p>
         </div>
-        {{ render_form(form, 'Save') }}
-        {% call render_section('Camera calibration') %}
+        {% call render_section('Video preview') %}
 
 	<img src="{{ url_for('tracking.feed', nonce=time) }}" alt="Tracking feed" class="max-w-xl">
 
         {% endcall %}
+        {{ render_form(form, 'Save') }}
+
+	{% call render_section('Shutter Speed Equivalence Table') %}
+	
+	<div> 
+	    <p>
+	      The PiCamera uses a value for shutter speed where 1 second == 1,000,000 units
+	    </p>
+        
+            <table>
+              <thead>
+                <tr>
+                    <th>Shutter Speed (s)<br></th>
+                    <th>PiCamera Equivalent Unit<br></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1     </td><td> 1,000,000</td></tr>
+                <tr><td>1/2   </td><td> 500,000  </td></tr>
+                <tr><td>1/4   </td><td> 125,000  </td></tr>
+                <tr><td>1/8   </td><td> 62,500   </td></tr>
+                <tr><td>1/16  </td><td> 62,500   </td></tr>
+                <tr><td>1/32  </td><td> 31,250   </td></tr>
+                <tr><td>1/64  </td><td> 15,625   </td</tr>
+                <tr><td>1/128 </td><td> 7,812    </td</tr>
+                <tr><td>1/256 </td><td> 3,906    </td</tr>
+                <tr><td>1/512 </td><td> 1,953    </td</tr>
+                <tr><td>1/1024</td><td> 976      </td</tr>
+                <tr><td>1/2048</td><td> 488      </td</tr>
+                <tr><td>1/4096</td><td> 244      </td</tr>
+              </tbody>
+            </table>
+	</div>
+	{% endcall %}
+
     {% endif %}
 {% endblock %}

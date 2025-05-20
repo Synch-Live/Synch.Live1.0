@@ -71,23 +71,27 @@ class ExperimentInfoForm(Form):
 def calibration_form(config):
     if config.server.CAMERA == 'pi':
         return PiCalibrationForm(request.form, config)
-    else:
-        return CalibrationForm(request.form, config)
 
 
 @bp.route('/calibrate', methods=['GET', 'POST'])
 def calibrate():
     video_processor = VideoProcessorClient()
+    if not video_processor.running:
+        VideoProcessorClient().start()
+
     form = calibration_form(video_processor.config)
     if request.method == 'POST' and form.validate():
         if form.save_config.data.get('save_file'):
             save_config(form.save_config.data.get('conf_path'))
         form.__delitem__('save_config')
-        config = SimpleNamespace(**video_processor.config.__dict__)
+
+        # form.data is a dict, config is a SimpleNamespace
+        config = parse(video_processor.config.__dict__)
         form.populate_obj(config)
         video_processor.config = config
 
         flash('Calibration complete!')
+
         return redirect(url_for('tracking.calibrate'))
     return render_template('control.html', form=form, tab='calibrate')
 
