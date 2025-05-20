@@ -48,7 +48,7 @@ class PlayerListener(ServiceListener):
             return
         name = info.server.rstrip(".local")
         player_id = name.lstrip("player")
-        self.queue.put(dict(name=name, action='replace', host=info.server, port=info.port,
+        self.queue.put(dict(name=name, action='replace', host=name, port=info.port,
                             player_id=player_id))
 
     def remove_service(self, zc: Zeroconf, type_: str, name: str) -> None:
@@ -57,7 +57,7 @@ class PlayerListener(ServiceListener):
             return
         name = info.server.rstrip(".local")
         player_id = name.lstrip("player")
-        self.queue.put(dict(name=name, action='remove', host=info.server, port=info.port,
+        self.queue.put(dict(name=name, action='remove', host=name, port=info.port,
                             player_id=player_id))
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
@@ -66,5 +66,5 @@ class PlayerListener(ServiceListener):
             return
         name = info.server.rstrip(".local")
         player_id = name.lstrip("player")
-        self.queue.put(dict(name=name, action='append', host=info.server, port=info.port,
+        self.queue.put(dict(name=name, action='append', host=name, port=info.port,
                             player_id=player_id))
