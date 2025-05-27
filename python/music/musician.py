@@ -7,7 +7,8 @@ from typing import List, Optional
 
 import logger
 
-PSI_URL = "http://observer:8888/sync"
+#PSI_URL = "http://127.0.0.1:8888/"
+PSI_URL  = "http://observer:8888/sync"
 INTERVAL = 3
 
 
@@ -73,7 +74,7 @@ class AudioFeedback:
 
 
     @classmethod
-    def get_all_volumes(cls):
+    def get_all_volumes(cls) -> List[float]:
         """
         Get current volumes of all tracked streams.
 
@@ -93,7 +94,6 @@ class AudioFeedback:
 
 
 
-
 async def fetch_sync() -> Optional[float]:
     """
     Asynchronously fetch a value from HTTP endpoint without waiting, or return None
@@ -106,7 +106,6 @@ async def fetch_sync() -> Optional[float]:
     except:
         logging.info("Exception in fetching psi")
         return None
-
 
 
 async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None:
@@ -128,7 +127,8 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
         logging.info(f"Sync: {sync}")
 
         if sync is None:
-            logging.info("Sync param was not fetched: entering mock synchronous loop")
+            logging.info("Sync param was not fetched: entering mock loop")
+            # TODO mock winning the game with sound as with lights
             return 0
 
         val = sync
@@ -144,14 +144,15 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
         return 1
 
 
+
 # Code developed/used by HL
-def getVolumeForPsi(psi, start):
+def getVolumeForPsi(psi: float, start: float) -> float:
 	end = start + 0.1
 	vrange = end - start
 	val = (psi - start) / vrange
 	return min(1, max(0, val))
 
-def onValueChange(psi, trackers):
+def onValueChange(psi: float, trackers: List[AudioFeedback]) -> None:
     vols = [ getVolumeForPsi(psi, 0.3)
            , getVolumeForPsi(psi, 0.5)
            , getVolumeForPsi(psi, 0.75)
@@ -162,6 +163,38 @@ def onValueChange(psi, trackers):
 
     for i, tracker in enumerate(trackers[1:]):
         tracker.set_volume(vols[i])
+        logging.info(f"Track {i+1} volume {tracker.get_volume()}")
+
+
+
+def example_inc(trackers: List[AudioFeedback]):
+    """
+    Example function which simulates a slowly increasing Psi
+    """
+    try:
+        psi = 0
+        while True:
+            onValueChange(psi, trackers)
+            time.sleep(1)
+            psi = psi + 0.05
+    except KeyboardInterrupt:
+        AudioFeedback.stop_all()
+        pygame.mixer.quit()
+
+
+def example_dec(trackers: List[AudioFeedback]):
+    """
+    Example function which simulates a slowly decreasing Psi
+    """
+    try:
+        psi = 1 
+        while True:
+            onValueChange(psi, trackers)
+            time.sleep(1)
+            psi = psi - 0.05
+    except KeyboardInterrupt:
+        AudioFeedback.stop_all()
+        pygame.mixer.quit()
 
 
 if __name__ == "__main__":
@@ -170,29 +203,21 @@ if __name__ == "__main__":
     mp3s = [ f"../../media/music/{m}" for m in mp3s ]
 
     pygame.mixer.init()
+    logging.info("Initialised audio mixer")
 
     trackers = []
-    for idx, mp3 in enumerate(mp3s):
+    for i, mp3 in enumerate(mp3s):
         init_vol = 0
-        if idx == 0:
+        if i == 0:
             init_vol = 1
 
-        tracker = AudioFeedback(mp3, channel_id = idx, default_start_volume = init_vol)
+        tracker = AudioFeedback(mp3, channel_id = i, default_start_volume = init_vol)
         trackers.append(tracker)
+    logging.info("Initialised audio tracks")
 
     for tracker in trackers:
         tracker.play()
 
-    # Example: dynamically update volumes
-    try:
-        psi = 0
-        while True:
-            # Example: cycle volumes for demo purposes
-            onValueChange(psi, trackers)
-            print("Current volumes:", AudioFeedback.get_all_volumes())
-            time.sleep(1)
-            psi = psi + 0.05
-    except KeyboardInterrupt:
-        AudioFeedback.stop_all()
-        pygame.mixer.quit()
+    logging.info("Begin running loop that fetches Psi")
+    ret = asyncio.run(loop(INTERVAL, 0.1, trackers))
 
