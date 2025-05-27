@@ -1,5 +1,5 @@
 import asyncio
-#import aiohttp
+import aiohttp
 import logging
 import pygame
 import time
@@ -7,8 +7,10 @@ from typing import List, Optional
 
 import logger
 
-#PSI_URL = "http://127.0.0.1:8888/"
-PSI_URL  = "http://observer:8888/sync"
+# put a hostname of your machine with a dot, or use 
+# the one below when connected to SL router
+TEST_URL = "http://your.test.hostname:8888/"
+PSI_URL  = "http://observer.synch.live:8888/sync"
 INTERVAL = 3
 
 
@@ -93,18 +95,33 @@ class AudioFeedback:
         cls.instances.clear()
 
 
+async def fetch_sync_mock() -> Optional[float]:
+    """
+    Asynchronously fetch a value from HTTP endpoint without waiting, or return None.
+    Note the HTTP endpoint must not have a "malformed" URL (localhost does not work)
+    """
+    try:
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(TEST_URL) as resp:
+                r = await resp.text()
+                return r
+    except Exception as e:
+        logging.info(f"Exception in fetching value from test URL: {e}")
+        return None
+
 
 async def fetch_sync() -> Optional[float]:
     """
-    Asynchronously fetch a value from HTTP endpoint without waiting, or return None
+    Asynchronously fetch a value from HTTP endpoint without waiting, or return None.
+    Note the HTTP endpoint must not have a "malformed" URL (localhost does not work)
     """
     try:
         async with aiohttp.ClientSession() as sess:
             async with sess.get(PSI_URL) as resp:
                 r = await resp.json()
                 return r
-    except:
-        logging.info("Exception in fetching psi")
+    except Exception as e:
+        logging.info(f"Exception in fetching psi: {e}")
         return None
 
 
@@ -123,6 +140,7 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
     gen = tick()
 
     while val > 0:
+        # replace with fetch_sync_mock() to test
         sync = await fetch_sync()
         logging.info(f"Sync: {sync}")
 
@@ -131,13 +149,13 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
             # TODO mock winning the game with sound as with lights
             return 0
 
-        val = sync
+        val = 1 - float(sync)
 
         time.sleep(next(gen))
         logging.info(f'Tick')
 
         # adjust song based on Psi
-        getVolumeForPsi(val, trackers)
+        onValueChange(val, trackers)
 
     if val == 1:
         logging.info("Emergence suceeded! Entering rainbow loop")
