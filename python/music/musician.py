@@ -3,11 +3,11 @@ import asyncio
 import logging
 import pygame
 import time
-from typing import Optional
+from typing import List, Optional
 
 import logger
 
-VOL_URL = "http://observer:8888/sync"
+PSI_URL = "http://observer:8888/sync"
 INTERVAL = 3
 
 
@@ -34,13 +34,19 @@ class AudioFeedback:
         self.sound = pygame.mixer.Sound(mp3)
         self.channel = pygame.mixer.Channel(channel_id)
 
-        self.channel.play(self.sound, loops=-1)  # loop indefinitely
         self.current_volume = default_start_volume 
         self.channel.set_volume(self.current_volume)
         AudioFeedback.instances.append(self)
 
         logging.info(f"Initialised AudioFeedback channel {channel_id}: {mp3}")
         logging.info(f"  with volume {default_start_volume}")
+
+
+    def play(self):
+        """
+        Start playing the audio stream in infinite loop
+        """
+        self.channel.play(self.sound, loops=-1)
 
 
     def set_volume(self, volume: float):
@@ -89,6 +95,9 @@ class AudioFeedback:
 
 
 async def fetch_sync() -> Optional[float]:
+    """
+    Asynchronously fetch a value from HTTP endpoint without waiting, or return None
+    """
     try:
         async with aiohttp.ClientSession() as sess:
             async with sess.get(PSI_URL) as resp:
@@ -100,7 +109,7 @@ async def fetch_sync() -> Optional[float]:
 
 
 
-async def loop(period: float, val: float) -> None:
+async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None:
     """
     This function uses a generator defined below in the tick() function to call
     the fetch_sync function with the same period as what makes the lights blink,
@@ -127,8 +136,8 @@ async def loop(period: float, val: float) -> None:
         time.sleep(next(gen))
         logging.info(f'Tick')
 
-        # adjust song
-        
+        # adjust song based on Psi
+        getVolumeForPsi(val, trackers)
 
     if val == 1:
         logging.info("Emergence suceeded! Entering rainbow loop")
@@ -170,6 +179,9 @@ if __name__ == "__main__":
 
         tracker = AudioFeedback(mp3, channel_id = idx, default_start_volume = init_vol)
         trackers.append(tracker)
+
+    for tracker in trackers:
+        tracker.play()
 
     # Example: dynamically update volumes
     try:
