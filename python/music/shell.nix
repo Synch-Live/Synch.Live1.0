@@ -4,6 +4,7 @@ let
   pythonEnv = pkgs.python310.withPackages (ps: with ps; [
     aiohttp
     pygame
+    pyserial
   ]);
 in
 
