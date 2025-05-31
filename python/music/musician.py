@@ -9,7 +9,7 @@ import logger
 
 # put a hostname of your machine with a dot, or use 
 # the one below when connected to SL router
-TEST_URL = "http://your.test.hostname:8888/"
+TEST_URL = "http://127.0.0.1:8888/"
 PSI_URL  = "http://observer.synch.live:8888/sync"
 INTERVAL = 3
 
@@ -141,8 +141,7 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
 
     while val > 0:
         # replace with fetch_sync_mock() to test
-        sync = await fetch_sync()
-        logging.info(f"Sync: {sync}")
+        sync = await fetch_sync_mock()
 
         if sync is None:
             logging.info("Sync param was not fetched: entering mock loop")
@@ -150,12 +149,13 @@ async def loop(period: float, val: float, trackers: List[AudioFeedback]) -> None
             return 0
 
         val = 1 - float(sync)
+        logging.info(f"1 - Sync: {val}")
 
         time.sleep(next(gen))
         logging.info(f'Tick')
 
         # adjust song based on Psi
-        onValueChange(val, trackers)
+        dynamic_volume(val, trackers)
 
     if val == 1:
         logging.info("Emergence suceeded! Entering rainbow loop")
@@ -184,6 +184,34 @@ def onValueChange(psi: float, trackers: List[AudioFeedback]) -> None:
         logging.info(f"Track {i+1} volume {tracker.get_volume()}")
 
 
+def dynamic_volume(sync: float, trackers: List[AudioFeedback]):
+    sync = max(0.0, min(1.0, sync))
+    raw_vols = {
+        "base": 1.0,
+    }
+    peaks = {
+        "layer1": 0.3,
+        "layer2": 0.5,
+        "layer3": 0.75,
+        "layer4": 0.9,
+    }
+
+    def volume_curve(sync, peak, width=0.2):
+        distance = abs(sync - peak)
+        if distance > width:
+            return 0.0
+        return max(0.0, 1 - (distance / width))
+
+    for layer, peak in peaks.items():
+        raw_vols[layer] = volume_curve(sync, peak)
+
+    total = sum(raw_vols.values())
+    vols  = [ vol / total for track, vol in raw_vols.items() ]
+
+    for i, tracker in enumerate(trackers):
+        tracker.set_volume(vols[i])
+        logging.info(f"Track {i+1} volume {tracker.get_volume()}")
+
 
 def example_inc(trackers: List[AudioFeedback]):
     """
@@ -192,8 +220,9 @@ def example_inc(trackers: List[AudioFeedback]):
     try:
         psi = 0
         while True:
-            onValueChange(psi, trackers)
-            time.sleep(1)
+            #onValueChange(psi, trackers)
+            dynamic_volume(psi, trackers)
+            time.sleep(2)
             psi = psi + 0.05
     except KeyboardInterrupt:
         AudioFeedback.stop_all()
@@ -207,8 +236,9 @@ def example_dec(trackers: List[AudioFeedback]):
     try:
         psi = 1 
         while True:
-            onValueChange(psi, trackers)
-            time.sleep(1)
+            #onValueChange(psi, trackers)
+            dynamic_volume(psi, trackers)
+            time.sleep(2)
             psi = psi - 0.05
     except KeyboardInterrupt:
         AudioFeedback.stop_all()
@@ -236,6 +266,9 @@ if __name__ == "__main__":
     for tracker in trackers:
         tracker.play()
 
-    logging.info("Begin running loop that fetches Psi")
-    ret = asyncio.run(loop(INTERVAL, 0.1, trackers))
+    example_dec(trackers)
+
+    #logging.info("Begin running loop that fetches Psi")
+    #ret = asyncio.run(loop(INTERVAL, 0.1, trackers))
+    
 
